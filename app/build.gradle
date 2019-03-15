@@ -1,0 +1,91 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
+android {
+    compileSdkVersion xl.compileSdkVersion
+    defaultConfig {
+        applicationId "com.jlkf.text.textapp"
+        minSdkVersion xl.minSdkVersion
+        //noinspection OldTargetApi
+        targetSdkVersion xl.targetSdkVersion
+        versionCode xl.versionCode
+        versionName xl.versionName
+        multiDexEnabled true
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    greendao {
+        schemaVersion 1
+        daoPackage 'com.greendao.gen'
+        targetGenDir 'src/main/java'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    // 换成己工程里依赖的 support-v4 的版本
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
+    //沉浸式
+    implementation 'com.gyf.immersionbar:immersionbar:2.3.2'
+    //注解进行初始化控件
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    //日志
+    implementation 'com.orhanobut:logger:2.2.0'
+    //适配器
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.30'
+    //图片加载
+    implementation('com.github.bumptech.glide:glide:4.8.0') {
+        exclude group: "com.android.support"
+    }
+    //noinspection GradleDependency
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
+    // 必要rxjava2依赖
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.1'
+    // 必要rxandrroid依赖，切线程时需要用到
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    // 必要retrofit依赖
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    // 必要依赖，和Rxjava结合必须用到，下面会提到
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    // 必要依赖，解析json字符所用
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    //防崩溃
+    implementation 'com.wanjian:cockroach:0.0.5'
+    //拍照
+    implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.2.3'
+    //菜单
+    implementation 'com.nightonke:boommenu:2.1.1'
+    //拼音
+    implementation 'com.github.promeg:tinypinyin:2.0.3'
+    //视频直播
+    implementation 'com.shuyu:GSYVideoPlayer:6.0.1'
+    //图表
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0-alpha'
+    //日历
+    implementation 'com.github.MagicMashRoom:SuperCalendar:1.6'
+    // 数据库
+    implementation 'org.greenrobot:greendao:3.2.2'
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            def requested = details.requested
+            if (requested.group == 'com.android.support') {
+                if (!requested.name.startsWith("multidex")) {
+                    details.useVersion '27.1.1'
+                }
+            }
+        }
+    }
+
+}
