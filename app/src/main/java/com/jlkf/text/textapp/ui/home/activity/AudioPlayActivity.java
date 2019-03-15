@@ -52,7 +52,7 @@ public class AudioPlayActivity extends GSYBaseActivityDetail<StandardGSYVideoPla
         //mVideoPath = "http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8"; //拉流端地址CCTV 1
         //内置封面可参考SampleCoverVideo
         ImageView imageView = new ImageView(this);
-        loadCover(imageView, "http://mpj.jlkfapp.com/data/upload/1/201811/2219285908872646.png");
+        loadCover(imageView, "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1552632581841&di=f5b25f99ea67b12437774d0f70d8b0bd&imgtype=0&src=http%3A%2F%2Fwww.bainaben.com%2Fup_files%2Fimage%2FArticle%2F2009%2F02%2F03%2F32362951.jpg");
         return new GSYVideoOptionBuilder()
                 .setThumbImageView(imageView)
                 .setUrl("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8")

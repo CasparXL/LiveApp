@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.TextView;
 
 import com.jlkf.text.textapp.R;
 import com.jlkf.text.textapp.base.BaseActivity;
@@ -39,6 +40,8 @@ public class PhotoActivity extends BaseActivity {
 
     @BindView(R.id.rv_menu)
     RecyclerView rv_menu;
+    @BindView(R.id.tv_title)
+    TextView tv_title;
     PhotoAdapter adapter;
     private List<LocalMedia> selectList = new ArrayList<>();
     private List<String> selectLists;
@@ -63,6 +66,7 @@ public class PhotoActivity extends BaseActivity {
 
     }
     public void initAdapter(){
+        tv_title.setText("相册拍照");
         selectLists=new ArrayList<>();
         adapter = new PhotoAdapter(selectLists);
         rv_menu.setLayoutManager(new GridLayoutManager(this, 3));

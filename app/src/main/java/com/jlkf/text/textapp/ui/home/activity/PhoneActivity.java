@@ -17,12 +17,15 @@ import com.jlkf.text.textapp.util.index.helper.SortHelper;
 import com.jlkf.text.textapp.util.index.listener.OnSideBarTouchListener;
 import com.jlkf.text.textapp.util.index.weiget.SideBar;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
 /**
  * 功能，索引列表[经典例子：城市列表]
  * 依赖来源:https://github.com/SheHuan/GroupIndexLib
@@ -33,6 +36,8 @@ public class PhoneActivity extends BaseActivity {
 
     @BindView(R.id.rv_list)
     RecyclerView rvList;
+    @BindView(R.id.tv_title)
+    TextView tv_title;
     @BindView(R.id.sb_right)
     SideBar sbRight;
     @BindView(R.id.tip)
@@ -41,6 +46,7 @@ public class PhoneActivity extends BaseActivity {
     PhoneAdapter adapter;
     List<String> tags;
     LinearLayoutManager layoutManager;
+
     @Override
     public int intiLayout() {
         return R.layout.activity_phone;
@@ -48,6 +54,7 @@ public class PhoneActivity extends BaseActivity {
 
     @Override
     public void initView() {
+        tv_title.setText("城市列表");
         mList.add(new ItemData("北京"));
         mList.add(new ItemData("上海"));
         mList.add(new ItemData("广州"));
@@ -92,7 +99,7 @@ public class PhoneActivity extends BaseActivity {
         adapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
             @Override
             public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                switch (view.getId()){
+                switch (view.getId()) {
                     case R.id.title:
                         toastShort(mList.get(position).getTitle());
                         break;
@@ -125,7 +132,7 @@ public class PhoneActivity extends BaseActivity {
 
     }
 
-    public void initAdapter(){
+    public void initAdapter() {
         SortHelper<ItemData> sortHelper = new SortHelper<ItemData>() {
             @Override
             public String sortField(ItemData data) {
@@ -134,7 +141,7 @@ public class PhoneActivity extends BaseActivity {
         };
         sortHelper.sortByLetter(mList);
         tags = sortHelper.getTags(mList);
-        adapter=new PhoneAdapter(mList);
+        adapter = new PhoneAdapter(mList);
         layoutManager = new LinearLayoutManager(this);
         rvList.setLayoutManager(layoutManager);
         rvList.addItemDecoration(new GroupHeaderItemDecoration(this).setTags(tags).setGroupHeaderHeight(30)
@@ -142,6 +149,7 @@ public class PhoneActivity extends BaseActivity {
         rvList.addItemDecoration(new DivideItemDecoration().setTags(tags));
         rvList.setAdapter(adapter);
     }
+
     @OnClick(R.id.iv_back)
     public void onViewClicked() {
         finish();

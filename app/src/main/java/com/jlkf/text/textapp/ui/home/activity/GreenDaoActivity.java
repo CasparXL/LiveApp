@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.greendao.gen.UserDao;
 import com.jlkf.text.textapp.R;
@@ -36,6 +37,8 @@ import butterknife.OnClick;
 public class GreenDaoActivity extends BaseActivity {
 
 
+    @BindView(R.id.tv_title)
+    TextView tv_title;
     @BindView(R.id.rv_list)
     RecyclerView rv_list;
     @BindView(R.id.et_name)
@@ -57,6 +60,7 @@ public class GreenDaoActivity extends BaseActivity {
 
     @Override
     public void initView() {
+        tv_title.setText("数据库");
         mUserDao = BaseApplication.getApplication().getDaoSession().getUserDao();
 
         adapter = new GreenDaoAdapter(users);
@@ -81,8 +85,8 @@ public class GreenDaoActivity extends BaseActivity {
         String name = et_name.getText().toString().trim();
         String sex = et_sex.getText().toString().trim();
         String id_card = et_id_card.getText().toString().trim();
-        int size=mUserDao.loadAll().size();
-        try{
+        int size = mUserDao.loadAll().size();
+        try {
             switch (view.getId()) {
                 case R.id.iv_back:
                     finish();
@@ -93,19 +97,19 @@ public class GreenDaoActivity extends BaseActivity {
                     adapter.replaceData(mUserDao.loadAll());
                     break;
                 case R.id.btn_delete:
-                    mUserDao.deleteByKey((long) size-1);
+                    mUserDao.deleteByKey((long) size - 1);
                     adapter.replaceData(mUserDao.loadAll());
                     break;
                 case R.id.btn_select:
                     adapter.replaceData(mUserDao.loadAll());
                     break;
                 case R.id.btn_update:
-                    mUser = new User((long) size-1, name, sex, id_card);
+                    mUser = new User((long) size - 1, name, sex, id_card);
                     mUserDao.update(mUser);
                     adapter.replaceData(mUserDao.loadAll());
                     break;
             }
-        }catch (SQLiteConstraintException ex){
+        } catch (SQLiteConstraintException ex) {
             toastShort("SQL语句错误了，代码暂未完善，有需要的自己完善一下");
         }
 
@@ -113,6 +117,6 @@ public class GreenDaoActivity extends BaseActivity {
 
     @Override
     public int[] hideSoftByEditViewIds() {
-        return new int[]{R.id.et_name,R.id.et_sex,R.id.et_id_card};
+        return new int[]{R.id.et_name, R.id.et_sex, R.id.et_id_card};
     }
 }
