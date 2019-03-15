@@ -1,4 +1,4 @@
-package com.jlkf.text.textapp.network.util;
+package com.jlkf.text.textapp.net.util.httptype;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class PostType {
      * @param value
      * @return
      */
-    public static RequestBody toRequestBody(String value) {
+    public static RequestBody toStringRequestBody(String value) {
         if (value != null)
         return RequestBody.create(MediaType.parse("text/plain"), value);
         else
@@ -31,7 +31,7 @@ public class PostType {
      * @param value
      * @return
      */
-    public static RequestBody toRequestBody(File value) {
+    public static RequestBody toFileRequestBody(File value) {
         if (value != null)
             return RequestBody.create(MediaType.parse("multipart/form-data"), value);
         else
@@ -39,10 +39,10 @@ public class PostType {
     }
 
     /**
-     * @param requestDataMap Map<String, String> requestDataMap这里面放置上传数据的键值对。
+     * @param requestDataMap 用于Retrofit的Post请求form表单数据过多可以使用该请求
      * @return
      */
-    public static Map<String, RequestBody> toRequestBody(Map<String, String> requestDataMap) {
+    public static Map<String, RequestBody> toMapRequestBody(Map<String, String> requestDataMap) {
         Map<String, RequestBody> requestBodyMap = new HashMap<>();
         for (String key : requestDataMap.keySet()) {
             RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),
