@@ -1,145 +1,113 @@
 package com.jlkf.text.textapp.base;
 
-import android.annotation.SuppressLint;
-import android.content.pm.ActivityInfo;
+import android.content.Context;
+import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.gyf.barlibrary.ImmersionBar;
-import com.jlkf.text.textapp.R;
+import com.hjq.toast.ToastUtils;
 import com.jlkf.text.textapp.app.BaseApplication;
-import com.jlkf.text.textapp.base.fragment.BaseFragment;
-import com.jlkf.text.textapp.util.AppManager;
+import com.jlkf.text.textapp.network.RxLifecycleUtils;
 import com.jlkf.text.textapp.util.KeyBoardUtils;
-import com.jlkf.text.textapp.util.LogUtil;
+import com.uber.autodispose.AutoDisposeConverter;
 
-import butterknife.ButterKnife;
+import javax.inject.Inject;
 
-public abstract class BaseActivity extends AppCompatActivity {
+/**
+ * "浪小白" 创建 2019/7/1.
+ * 界面名称以及功能:
+ */
 
-    /***封装toast对象**/
-    private static Toast toast;
-    /***沉浸式**/
+public abstract class BaseActivity<T extends BaseContract.BasePresenter, SV extends ViewDataBinding> extends AppCompatActivity implements IBase, BaseContract.BaseView {
+    // 布局view
+    protected SV bindingView;
+    //P层
+    @Inject
+    public T mPresenter;
+    //沉浸式
     private ImmersionBar mImmersionBar;
-    /***是否第一次创建**/
-    public static Boolean isFirstCreated = false;
-    /***碎片管理器**/
-    private FragmentManager mFragmentManager;
-    /***临时碎片**/
-    private Fragment showFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         mImmersionBar = ImmersionBar.with(this).statusBarDarkFont(true).keyboardEnable(true);
         mImmersionBar.init();
-        AppManager.getAppManager().addActivity(this);
-        mFragmentManager = getSupportFragmentManager();
-        //设置布局
-        setContentView(intiLayout());
-        //绑定控件需要在setContentView前初始化后
-        ButterKnife.bind(this);
-        //初始化控件
+        initInjector(BaseApplication.getInstance().getApplicationComponent());
+        attachView();
+        //创建一个新的的布局绑定
+        bindingView = DataBindingUtil.setContentView(this, setContentLayout());
+        initIntent();
         initView();
-        //初始化监听器
-        initListener();
-        //设置数据
-        initData();
+    }
+
+    private void attachView() {
+        if (mPresenter != null) {
+            mPresenter.attachView(this);
+        }
+    }
+
+
+    @Override
+    public void setLoading() {
 
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        LogUtil.d("类名===" + this.getClass().getName());
+    public void dismissLoading() {
+
     }
 
-    /**
-     * 设置布局
-     *
-     * @return
-     */
-    public abstract int intiLayout();
 
-    /**
-     * 初始化布局
-     */
-    public abstract void initView();
+    @Override
+    public <T> AutoDisposeConverter<T> bindToLife() {
+        return RxLifecycleUtils.bindLifecycle(this);
+    }
 
-    /**
-     * 初始化监听器
-     */
-    public abstract void initListener();
-
-    /**
-     * 设置数据
-     */
-    public abstract void initData();
-
-    /**
-     * 显示长toast
-     *
-     * @param msg 内容
-     */
-    @SuppressLint("ShowToast")
-    public void toastLong(String msg) {
-        if (toast == null) {
-            toast = Toast.makeText(BaseApplication.getApplication(), msg, Toast.LENGTH_LONG);
-        } else {
-            toast.setText(msg);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mImmersionBar != null)
+            mImmersionBar.destroy();
+        if (mPresenter != null) {
+            mPresenter.detachView();
+            mPresenter = null;
         }
-        toast.show();//设置新的消息提示
     }
 
-    /**
-     * 显示短toast
-     *
-     * @param msg 内容
-     */
-    @SuppressLint("ShowToast")
-    public void toastShort(String msg) {
-        if (toast == null) {
-            toast = Toast.makeText(BaseApplication.getApplication(), msg, Toast.LENGTH_SHORT);
-        } else {
-            toast.setText(msg);
-        }
-        toast.show();//设置新的消息提示
-    }
-
-
-    public void fragmentManager(int fragId, BaseFragment fragment, String tag) {
-        FragmentTransaction ft = mFragmentManager.beginTransaction();
-        if (!fragment.isAdded() && null == getSupportFragmentManager().findFragmentByTag(tag)
-                && isFirstCreated) {
-            if (showFragment != null) {
-                ft.hide(showFragment).add(fragId, fragment, tag);
+    public void toast(Object text) {
+        if (text != null) {
+            if (text instanceof String) {
+                ToastUtils.show(text);
             } else {
-                ft.add(fragId, fragment, tag);
+                ToastUtils.show((int) text);
             }
-        } else { //已经加载进容器里去了....
-            if (showFragment != null) {
-                ft.hide(showFragment).show(fragment);
-            } else {
-                ft.show(fragment);
-            }
-        }
-        showFragment = fragment;
-        if (!isFinishing()) {
-            ft.commitAllowingStateLoss();
-            getSupportFragmentManager().executePendingTransactions();
         }
     }
 
     //--------------------------隐藏软键盘
+    @Override
+    public void finish() {
+        super.finish();
+        hideSoftKeyboard();
+    }
+
+    protected void hideSoftKeyboard() {
+        View view = getWindow().peekDecorView();
+        if (view != null) {
+            InputMethodManager inputManger = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            assert inputManger != null;
+            inputManger.hideSoftInputFromWindow(view.getWindowToken(),
+                    0);
+        }
+    }
 
     /**
      * 清除editText的焦点
@@ -213,6 +181,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
     //endregion
 
+    //region 右滑返回上级
+
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
@@ -226,7 +197,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 //隐藏键盘
                 KeyBoardUtils.hideInputForce(this);
                 clearViewFocus(v, hideSoftByEditViewIds());
-
             }
         }
         return super.dispatchTouchEvent(ev);
@@ -251,13 +221,5 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public View[] filterViewByIds() {
         return null;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mImmersionBar != null)
-            mImmersionBar.destroy();  //必须调用该方法，防止内存泄漏，不调用该方法，如果界面bar发生改变，在不关闭app的情况下，退出此界面再进入将记忆最后一次bar改变的状态
-        AppManager.getAppManager().finishActivity(this);
     }
 }

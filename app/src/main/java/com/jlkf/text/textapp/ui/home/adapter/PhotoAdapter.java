@@ -10,6 +10,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.jlkf.text.textapp.R;
+import com.jlkf.text.textapp.util.image.ImageLoaderManager;
 
 import java.util.List;
 
@@ -23,6 +24,6 @@ public class PhotoAdapter extends BaseQuickAdapter<String, BaseViewHolder> {
 
     @Override
     protected void convert(BaseViewHolder helper, String item) {
-        Glide.with(mContext).load(item).apply(new RequestOptions().error(R.mipmap.ic_launcher)).into((ImageView) helper.getView(R.id.iv_picture));
+        ImageLoaderManager.loadImage(mContext,item,helper.getView(R.id.iv_picture));
     }
 }

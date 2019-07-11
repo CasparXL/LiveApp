@@ -36,10 +36,13 @@ public class GroupHeaderItemDecoration extends RecyclerView.ItemDecoration {
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setColor(Color.parseColor("#FFEEEEEE"));
+        //mPaint.setColor(Color.WHITE);
 
         mTextPaint = new TextPaint();
         mTextPaint.setAntiAlias(true);
+        mTextPaint.setFakeBoldText(true);
         mTextPaint.setColor(Color.parseColor("#FF999999"));
+       // mTextPaint.setColor(Color.BLACK);
         mTextPaint.setTextSize(Utils.sp2px(context, 14));
     }
 
@@ -98,28 +101,29 @@ public class GroupHeaderItemDecoration extends RecyclerView.ItemDecoration {
         }
         //列表第一个可见的ItemView位置
         int position = ((LinearLayoutManager) (parent.getLayoutManager())).findFirstVisibleItemPosition();
-        String tag = tags.get(position);
-        //第一个可见的ItemView
-        View view = parent.findViewHolderForAdapterPosition(position).itemView;
-        //当前ItemView的data的tag和下一个ItemView的不相等，则代表将要重新绘制悬停的GroupHeader
-        boolean flag = false;
-        if ((position + 1) < tags.size() && !tag.equals(tags.get(position + 1))) {
-            //如果第一个可见ItemView的底部坐标小于groupHeaderHeight，则执行Canvas垂直位移操作
-            if (view.getBottom() <= groupHeaderHeight) {
-                c.save();
-                flag = true;
-                c.translate(0, view.getHeight() + view.getTop() - groupHeaderHeight);
+        if (position >= 0) {//判断是我自己加上去的，以后有问题删掉
+            String tag = tags.get(position);
+            //第一个可见的ItemView
+            View view = parent.findViewHolderForAdapterPosition(position).itemView;
+            //当前ItemView的data的tag和下一个ItemView的不相等，则代表将要重新绘制悬停的GroupHeader
+            boolean flag = false;
+            if ((position + 1) < tags.size() && !tag.equals(tags.get(position + 1))) {
+                //如果第一个可见ItemView的底部坐标小于groupHeaderHeight，则执行Canvas垂直位移操作
+                if (view.getBottom() <= groupHeaderHeight) {
+                    c.save();
+                    flag = true;
+                    c.translate(0, view.getHeight() + view.getTop() - groupHeaderHeight);
+                }
             }
-        }
 
-        if (drawItemDecorationListener == null) {
-            drawSuspensionGroupHeader(c, parent, tag);
-        } else {
-            drawItemDecorationListener.onDrawSuspensionGroupHeader(c, mPaint, mTextPaint, getSuspensionGroupHeaderCoordinate(parent), position);
-        }
-
-        if (flag) {
-            c.restore();
+            if (drawItemDecorationListener == null) {
+                drawSuspensionGroupHeader(c, parent, tag);
+            } else {
+                drawItemDecorationListener.onDrawSuspensionGroupHeader(c, mPaint, mTextPaint, getSuspensionGroupHeaderCoordinate(parent), position);
+            }
+            if (flag) {
+                c.restore();
+            }
         }
     }
 

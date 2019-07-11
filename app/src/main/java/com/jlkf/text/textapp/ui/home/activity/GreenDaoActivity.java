@@ -1,119 +1,99 @@
 package com.jlkf.text.textapp.ui.home.activity;
 
-import android.database.sqlite.SQLiteConstraintException;
-import android.os.Bundle;
+
+import android.databinding.ObservableField;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.greendao.gen.UserDao;
 import com.jlkf.text.textapp.R;
-import com.jlkf.text.textapp.app.BaseApplication;
-import com.jlkf.text.textapp.base.BaseActivity;
-import com.jlkf.text.textapp.ui.home.adapter.GreenDaoAdapter;
-import com.jlkf.text.textapp.ui.home.bean.User;
-import com.jlkf.text.textapp.util.LogUtil;
-import com.jlkf.text.textapp.util.decoration.Decoration;
 
-import org.greenrobot.greendao.DaoException;
-import org.greenrobot.greendao.query.QueryBuilder;
+import com.jlkf.text.textapp.base.BaseActivity;
+import com.jlkf.text.textapp.base.NoContract;
+import com.jlkf.text.textapp.base.NoPresenter;
+import com.jlkf.text.textapp.bean.dao.User;
+import com.jlkf.text.textapp.bean.dao.UserDao;
+import com.jlkf.text.textapp.databinding.ActivityGreenDaoBinding;
+import com.jlkf.text.textapp.injection.component.ApplicationComponent;
+import com.jlkf.text.textapp.injection.component.DaggerHttpComponent;
+import com.jlkf.text.textapp.ui.home.adapter.GreenDaoAdapter;
+import com.jlkf.text.textapp.util.decoration.Decoration;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
- * 使用GreenDao数据库操作
- * 所用依赖:implementation 'org.greenrobot:greendao:3.2.2'
- * 依赖位置:https://github.com/greenrobot/greenDAO
+ * 原：使用GreenDao数据库操作 现在：  更换数据库同一个团队的作品 [ObjectBox]，由原本的db文件改为mdb
+ * 所用依赖:原来：implementation 'org.greenrobot:greendao:3.2.2' 现在：releaseImplementation io.objectbox:objectbox-android:2.3.4
+ * 依赖位置:原来：https://github.com/greenrobot/greenDAO 现在:https://github.com/objectbox/objectbox-java
  */
-public class GreenDaoActivity extends BaseActivity {
-
-
-    @BindView(R.id.tv_title)
-    TextView tv_title;
-    @BindView(R.id.rv_list)
-    RecyclerView rv_list;
-    @BindView(R.id.et_name)
-    EditText et_name;
-    @BindView(R.id.et_sex)
-    EditText et_sex;
-    @BindView(R.id.et_id_card)
-    EditText et_id_card;
-    UserDao mUserDao;
-    User mUser;
-
-    List<User> users = new ArrayList<>();
+public class GreenDaoActivity extends BaseActivity<NoPresenter, ActivityGreenDaoBinding> implements NoContract.View {
     GreenDaoAdapter adapter;
+    List<User> users;
+    public static final ObservableField<String> name = new ObservableField<>();
+
+    public static final ObservableField<String> sex = new ObservableField<>();
+
+    public static final ObservableField<String> idCard = new ObservableField<>();
 
     @Override
-    public int intiLayout() {
+    public int setContentLayout() {
         return R.layout.activity_green_dao;
     }
 
     @Override
+    public void initInjector(ApplicationComponent appComponent) {
+        DaggerHttpComponent.builder().applicationComponent(appComponent).build().inject(this);
+    }
+
+    @Override
     public void initView() {
-        tv_title.setText("数据库");
-        mUserDao = BaseApplication.getApplication().getDaoSession().getUserDao();
-
+        bindingView.include2.tvTitle.setText("数据库");
+        users = UserDao.getAll();
         adapter = new GreenDaoAdapter(users);
-        rv_list.setLayoutManager(new LinearLayoutManager(this));
-        rv_list.addItemDecoration(Decoration.decoration(10, 10, 20, 20));
-        rv_list.setAdapter(adapter);
-    }
-
-    @Override
-    public void initListener() {
-
-    }
-
-    @Override
-    public void initData() {
-
-    }
-
-
-    @OnClick({R.id.iv_back, R.id.btn_add, R.id.btn_delete, R.id.btn_select, R.id.btn_update})
-    public void onViewClicked(View view) {
-        String name = et_name.getText().toString().trim();
-        String sex = et_sex.getText().toString().trim();
-        String id_card = et_id_card.getText().toString().trim();
-        int size = mUserDao.loadAll().size();
-        try {
-            switch (view.getId()) {
-                case R.id.iv_back:
-                    finish();
-                    break;
-                case R.id.btn_add:
-                    mUser = new User((long) size, name, sex, id_card);
-                    mUserDao.insert(mUser);
-                    adapter.replaceData(mUserDao.loadAll());
-                    break;
-                case R.id.btn_delete:
-                    mUserDao.deleteByKey((long) size - 1);
-                    adapter.replaceData(mUserDao.loadAll());
-                    break;
-                case R.id.btn_select:
-                    adapter.replaceData(mUserDao.loadAll());
-                    break;
-                case R.id.btn_update:
-                    mUser = new User((long) size - 1, name, sex, id_card);
-                    mUserDao.update(mUser);
-                    adapter.replaceData(mUserDao.loadAll());
-                    break;
+        bindingView.rvList.setLayoutManager(new LinearLayoutManager(this));
+        bindingView.rvList.addItemDecoration(Decoration.decoration(10, 10, 20, 20));
+        bindingView.rvList.setAdapter(adapter);
+        bindingView.btnDelete.setOnClickListener(v -> {
+            if (UserDao.getAll().size() == 0) {
+                toast("已经没有数据了");
+                return;
             }
-        } catch (SQLiteConstraintException ex) {
-            toastShort("SQL语句错误了，代码暂未完善，有需要的自己完善一下");
-        }
+            UserDao.delete(UserDao.getAll().get(0).getId());
+            users.clear();
+            users.addAll(UserDao.getAll());
+            adapter.notifyDataSetChanged();
+        });
+
+        bindingView.btnAdd.setOnClickListener(v -> {
+            UserDao.insertOrUpdateBlogItem(new User(name.get() == null ? "" : name.get(), sex.get() == null ? "" : sex.get(), idCard.get() == null ? "" : idCard.get()));
+            users.clear();
+            users.addAll(UserDao.getAll());
+            adapter.notifyDataSetChanged();
+        });
+        bindingView.btnSelect.setOnClickListener(v -> {
+            users.clear();
+            users.addAll(UserDao.getAll());
+            adapter.notifyDataSetChanged();
+        });
+        bindingView.btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (UserDao.getAll().size() == 0) {
+                    toast("已经没有数据了");
+                    return;
+                }
+                UserDao.insertOrUpdateBlogItem(new User(UserDao.getAll().get(0).getId(), name.get() == null ? "" : name.get(), sex.get() == null ? "" : sex.get(), idCard.get() == null ? "" : idCard.get()));
+            }
+        });
 
     }
+
+    @Override
+    public void initIntent() {
+
+    }
+
 
     @Override
     public int[] hideSoftByEditViewIds() {

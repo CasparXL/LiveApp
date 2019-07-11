@@ -29,6 +29,8 @@ public class SideBar extends View {
     //索引字符数组
     public String[] indexArray = {"↑", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
             "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "#"};
+  /*  //索引字符数组
+    public String[] indexArray = { "#"};*/
 
     private List<String> tags;
 
@@ -174,6 +176,7 @@ public class SideBar extends View {
 
     public void setIndexsArray(String[] indexArray) {
         this.indexArray = indexArray;
+        //invalidate();
     }
 
     public void setOnSideBarTouchListener(List<String> tags, OnSideBarTouchListener onSideBarTouchListener) {

@@ -7,16 +7,24 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import com.greendao.gen.DaoMaster;
-import com.greendao.gen.DaoSession;
+import com.hjq.toast.ToastUtils;
+import com.jlkf.text.textapp.BuildConfig;
 import com.jlkf.text.textapp.R;
+import com.jlkf.text.textapp.bean.dao.MyObjectBox;
+import com.jlkf.text.textapp.injection.component.ApplicationComponent;
+import com.jlkf.text.textapp.injection.component.DaggerApplicationComponent;
+import com.jlkf.text.textapp.injection.model.ApplicationModule;
+import com.jlkf.text.textapp.injection.model.HttpModule;
 import com.jlkf.text.textapp.util.LogUtil;
+import com.jlkf.text.textapp.util.SP;
 import com.jlkf.text.textapp.util.errorUtil.Cockroach;
 import com.jlkf.text.textapp.util.errorUtil.ExceptionHandler;
 import com.jlkf.text.textapp.util.errorUtil.support.CrashLog;
 import com.jlkf.text.textapp.util.errorUtil.support.DebugSafeModeUI;
+import com.tencent.bugly.crashreport.CrashReport;
 
-import org.greenrobot.greendao.query.QueryBuilder;
+import io.objectbox.BoxStore;
+import io.objectbox.android.AndroidObjectBrowser;
 
 
 /**
@@ -25,11 +33,12 @@ import org.greenrobot.greendao.query.QueryBuilder;
 
 public class BaseApplication extends Application {
 
+    private static Context mContext;//上下文
+
+    private ApplicationComponent mApplicationComponent;
+
     private static BaseApplication application;
-    private DaoMaster.DevOpenHelper mHelper;
-    private SQLiteDatabase db;
-    private static DaoMaster mDaoMaster;
-    private static DaoSession mDaoSession;
+    private BoxStore boxStore;
 
     public BaseApplication() {
     }
@@ -38,38 +47,44 @@ public class BaseApplication extends Application {
 //  在主线程运行的
     public void onCreate() {
         super.onCreate();
+        mContext = getApplicationContext();
         application = this;
+        mApplicationComponent = DaggerApplicationComponent.builder()
+                .applicationModule(new ApplicationModule(this))
+                .httpModule(new HttpModule())
+                .build();
+
+        SP.init(this);
+        ToastUtils.init(this);
+        LogUtil.init(true, "浪小白");
+        boxStore = MyObjectBox.builder().androidContext(this).build();
+        if (BuildConfig.DEBUG) {
+            boolean started = new AndroidObjectBrowser(boxStore).start(this);
+            LogUtil.e("Started: " + started);
+        }
         install();
-        LogUtil.init(true);
-        setDatabase();
+        CrashReport.initCrashReport(getApplicationContext(), "3b5120f43f", true); //bugly集成
+    }
+
+    public static BaseApplication getInstance() {
+        return application;
+    }
+
+    public ApplicationComponent getApplicationComponent() {
+        return mApplicationComponent;
+    }
+
+    public static Context getContext() {
+        return mContext;
     }
 
     public static BaseApplication getApplication() {
         return application;
     }
 
-    /**
-     * 设置greenDAO
-     */
-    private void setDatabase() {
-        // 通过 DaoMaster 的内部类 DevOpenHelper，你可以得到一个便利的 SQLiteOpenHelper 对象。
-        // 可能你已经注意到了，你并不需要去编写「CREATE TABLE」这样的 SQL 语句，因为 greenDAO已经帮你做了。
-        // 注意：默认的 DaoMaster.DevOpenHelper 会在数据库升级时，删除所有的表，意味着这将导致数据的丢失。
-        // 所以，在正式的项目中，你还应该做一层封装，来实现数据库的安全升级。
-        mHelper = new DaoMaster.DevOpenHelper(this, "user_date", null);
-        db = mHelper.getWritableDatabase();
-        // 注意：该数据库连接属于 DaoMaster，所以多个 Session 指的是相同的数据库连接。
-        mDaoMaster = new DaoMaster(db);
-        mDaoSession = mDaoMaster.newSession();
-
+    public BoxStore getBoxStore() {
+        return boxStore;
     }
-    public DaoSession getDaoSession() {
-        return mDaoSession;
-    }
-    public SQLiteDatabase getDb() {
-        return db;
-    }
-
 
     /**
      * 报错
@@ -81,7 +96,7 @@ public class BaseApplication extends Application {
         Cockroach.install(new ExceptionHandler() {
             @Override
             protected void onUncaughtExceptionHappened(Thread thread, Throwable throwable) {
-                LogUtil.e("--->onUncaughtExceptionHappened:" + thread + "<---", throwable);
+                LogUtil.e("--->onUncaughtExceptionHappened:" + thread + "<---" + throwable);
                 CrashLog.saveCrashLog(getApplicationContext(), throwable);
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
@@ -95,7 +110,7 @@ public class BaseApplication extends Application {
             @Override
             protected void onBandageExceptionHappened(Throwable throwable) {
                 throwable.printStackTrace();//打印警告级别log，该throwable可能是最开始的bug导致的，无需关心
-                LogUtil.e("--->onBandageExceptionHappened:" + "<---", throwable);
+                LogUtil.e("--->onBandageExceptionHappened:" + "<---" + throwable);
                 toast.setText("Cockroach Worked");
                 toast.show();
             }
@@ -110,7 +125,7 @@ public class BaseApplication extends Application {
             @Override
             protected void onMayBeBlackScreen(Throwable e) {
                 final Thread thread = Looper.getMainLooper().getThread();
-                LogUtil.e("--->onMayBeBlackScreen:" + thread + "<---", e);
+                LogUtil.e("--->onMayBeBlackScreen:" + thread + "<---" + e);
                 //黑屏时建议直接杀死app 也可以取消这句话，但之后未加载的界面将不会再进行加载
                 new Handler().postDelayed(new Runnable() {
                     public void run() {

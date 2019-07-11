@@ -1,5 +1,7 @@
 package com.jlkf.text.textapp.ui.home.activity;
 
+import android.app.Activity;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -7,12 +9,11 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.jlkf.text.textapp.R;
+import com.jlkf.text.textapp.databinding.ActivityAudioPlayBinding;
 import com.shuyu.gsyvideoplayer.GSYBaseActivityDetail;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * 功能：视频播放器
@@ -20,37 +21,26 @@ import butterknife.ButterKnife;
  * 本项目中添加该功能所对应的依赖：implementation 'com.shuyu:GSYVideoPlayer:6.0.1'
  */
 public class AudioPlayActivity extends GSYBaseActivityDetail<StandardGSYVideoPlayer> {
-
-    @BindView(R.id.detail_player)
-    StandardGSYVideoPlayer detailPlayer;
+    ActivityAudioPlayBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_audio_play);
-        ButterKnife.bind(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_audio_play);
         //增加title
-        detailPlayer.getTitleTextView().setVisibility(View.GONE);
-        detailPlayer.getBackButton().setVisibility(View.VISIBLE);
-        detailPlayer.getBackButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        binding.detailPlayer.getTitleTextView().setVisibility(View.GONE);
+        binding.detailPlayer.getBackButton().setVisibility(View.VISIBLE);
+        binding.detailPlayer.getBackButton().setOnClickListener(v -> finish());
         initVideoBuilderMode();
     }
 
     @Override
     public StandardGSYVideoPlayer getGSYVideoPlayer() {
-        return detailPlayer;
+        return binding.detailPlayer;
     }
 
     @Override
     public GSYVideoOptionBuilder getGSYVideoOptionBuilder() {
-        //mVideoPath = "rtmp://pili-live-rtmp.jlkfapp.com/jlkf-live/test"; //拉流端地址 直播地址
-        //mVideoPath = "http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8"; //拉流端地址CCTV 1
-        //内置封面可参考SampleCoverVideo
         ImageView imageView = new ImageView(this);
         loadCover(imageView, "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1552632581841&di=f5b25f99ea67b12437774d0f70d8b0bd&imgtype=0&src=http%3A%2F%2Fwww.bainaben.com%2Fup_files%2Fimage%2FArticle%2F2009%2F02%2F03%2F32362951.jpg");
         return new GSYVideoOptionBuilder()

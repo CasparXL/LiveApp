@@ -8,7 +8,12 @@ import android.view.View;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.jlkf.text.textapp.R;
-import com.jlkf.text.textapp.base.fragment.BaseFragment;
+import com.jlkf.text.textapp.base.BaseFragment;
+import com.jlkf.text.textapp.base.NoContract;
+import com.jlkf.text.textapp.base.NoPresenter;
+import com.jlkf.text.textapp.databinding.FragmentHomeBinding;
+import com.jlkf.text.textapp.injection.component.ApplicationComponent;
+import com.jlkf.text.textapp.injection.component.DaggerHttpComponent;
 import com.jlkf.text.textapp.ui.home.activity.AudioPlayActivity;
 import com.jlkf.text.textapp.ui.home.activity.GreenDaoActivity;
 import com.jlkf.text.textapp.ui.home.activity.MovieActivity;
@@ -22,34 +27,15 @@ import com.jlkf.text.textapp.util.decoration.Decoration;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 
 /**
  * 首页功能菜单栏
  */
-public class HomeFragment extends BaseFragment {
-    @BindView(R.id.rv_menu)
-    RecyclerView rv_menu;
+public class HomeFragment extends BaseFragment<NoPresenter, FragmentHomeBinding> implements NoContract.View {
+
     List<String> list;
     HomeAdapter adapter;
 
-
-    @Override
-    protected int getContentView() {
-        return R.layout.fragment_home;
-    }
-
-    @Override
-    protected void initView(View view) {
-        list = new ArrayList<>();
-        listMenu();
-        initAdapter();
-    }
-
-    @Override
-    protected void loadData() {
-
-    }
 
     /**
      * 功能列表
@@ -69,17 +55,14 @@ public class HomeFragment extends BaseFragment {
      */
     public void initAdapter() {
         adapter = new HomeAdapter(list);
-        rv_menu.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        rv_menu.addItemDecoration(Decoration.GridDecoration(2, 20, true));
-        rv_menu.setAdapter(adapter);
-        adapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-            @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                switch (view.getId()) {
-                    case R.id.btn_item:
-                        onClick(position);
-                        break;
-                }
+        bindingView.rvMenu.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+        bindingView.rvMenu.addItemDecoration(Decoration.GridDecoration(2, 20, true));
+        bindingView.rvMenu.setAdapter(adapter);
+        adapter.setOnItemChildClickListener((adapter, view, position) -> {
+            switch (view.getId()) {
+                case R.id.btn_item:
+                    onClick(position);
+                    break;
             }
         });
     }
@@ -110,4 +93,25 @@ public class HomeFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public int setContentLayout() {
+        return R.layout.fragment_home;
+    }
+
+    @Override
+    public void initInjector(ApplicationComponent appComponent) {
+        DaggerHttpComponent.builder().applicationComponent(appComponent).build().inject(this);
+    }
+
+    @Override
+    public void initView() {
+        list = new ArrayList<>();
+        listMenu();
+        initAdapter();
+    }
+
+    @Override
+    public void initIntent() {
+
+    }
 }

@@ -5,36 +5,41 @@ import android.widget.TextView;
 
 import com.jlkf.text.textapp.R;
 import com.jlkf.text.textapp.base.BaseActivity;
+import com.jlkf.text.textapp.base.NoContract;
+import com.jlkf.text.textapp.base.NoPresenter;
+import com.jlkf.text.textapp.databinding.ActivityMovieBinding;
+import com.jlkf.text.textapp.injection.component.ApplicationComponent;
+import com.jlkf.text.textapp.injection.component.DaggerHttpComponent;
 import com.jlkf.text.textapp.util.SeatTable;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * 影院选座功能
  * 来源：https://github.com/qifengdeqingchen/SeatTable
  * 自定义工具类SeatTable
  */
-public class MovieActivity extends BaseActivity {
+public class MovieActivity extends BaseActivity<NoPresenter, ActivityMovieBinding> implements NoContract.View {
 
-    @BindView(R.id.tv_title)
-    TextView tvTitle;
-    @BindView(R.id.st)
-    SeatTable seatTableView;
+    
 
     @Override
-    public int intiLayout() {
+    public int setContentLayout() {
         return R.layout.activity_movie;
     }
 
     @Override
-    public void initView() {
-        tvTitle.setText("影院选座");
-        seatTableView.setScreenName("8号厅荧幕");//设置屏幕名称
-        seatTableView.setMaxSelected(3);//设置最多选中
+    public void initInjector(ApplicationComponent appComponent) {
+        DaggerHttpComponent.builder().applicationComponent(appComponent).build().inject(this);
 
-        seatTableView.setSeatChecker(new SeatTable.SeatChecker() {
+    }
+
+    @Override
+    public void initView() {
+        bindingView.include2.tvTitle.setText("影院选座");
+        bindingView.st.setScreenName("8号厅荧幕");//设置屏幕名称
+         bindingView.st.setMaxSelected(3);//设置最多选中
+
+         bindingView.st.setSeatChecker(new SeatTable.SeatChecker() {
 
             @Override
             public boolean isValidSeat(int row, int column) {
@@ -68,22 +73,14 @@ public class MovieActivity extends BaseActivity {
             }
 
         });
-        seatTableView.setData(10, 16);
-    }
-
-    @Override
-    public void initListener() {
+         bindingView.st.setData(10, 16);
+        bindingView.include2.ivBack.setOnClickListener(v -> finish());
 
     }
 
     @Override
-    public void initData() {
+    public void initIntent() {
 
     }
 
-
-    @OnClick(R.id.iv_back)
-    public void onViewClicked() {
-        finish();
-    }
 }

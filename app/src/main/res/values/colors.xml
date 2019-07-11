@@ -7,4 +7,18 @@
     <color name="appColor">#2e87d6</color>
     <color name="normal">#6A3333</color>
     <color name="item">#8de6dd</color>
+    <color name="app_color">#89CEEC</color>
+    <color name="splash_color">#8fd0ec</color>
+    <color name="black">#353535</color>
+    <color name="red">#F53D56</color>
+    <color name="guide_color">#424e64</color>
+    <color name="dot_selector_on">#e5e5e5</color>
+    <color name="dot_selector_off">#CCCCCC</color>
+    <color name="view_gray">#e9e9e9</color>
+    <color name="text_gray">#9C9C9C</color>
+    <color name="blue">#4fbcfc</color>
+    <color name="green">#6EB91C</color>
+    <color name="status_color">#686868</color>
+    <color name="view_background">#f3f5f8</color>
+    <color name="dialog_bg_press">#f0f0f0</color>
 </resources>

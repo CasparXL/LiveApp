@@ -2,41 +2,35 @@ package com.jlkf.text.textapp;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.jlkf.text.textapp.base.BaseActivity;
-import com.jlkf.text.textapp.base.fragment.BaseFragment;
-import com.jlkf.text.textapp.base.fragment.FragmentFactory;
+import com.jlkf.text.textapp.base.NoContract;
+import com.jlkf.text.textapp.base.NoPresenter;
+import com.jlkf.text.textapp.databinding.ActivityMainBinding;
+import com.jlkf.text.textapp.injection.component.ApplicationComponent;
+import com.jlkf.text.textapp.injection.component.DaggerHttpComponent;
+import com.jlkf.text.textapp.ui.home.HomeFragment;
+import com.jlkf.text.textapp.ui.mine.MineFragment;
+import com.jlkf.text.textapp.ui.one.MenuOneFragment;
+import com.jlkf.text.textapp.ui.two.MenuTwoFragment;
 import com.jlkf.text.textapp.util.DataCleanManager;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.TextOutsideCircleButton;
-import com.nightonke.boommenu.BoomMenuButton;
 
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * 首页左下角用到的菜单栏 ：依赖来源:【https://github.com/Nightonke/BoomMenu】 对应依赖【implementation 'com.nightonke:boommenu:2.1.1'】
- *
  */
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity<NoPresenter, ActivityMainBinding> implements NoContract.View {
+    HomeFragment homeFragment;
+    MenuTwoFragment menuTwoFragment;
+    MenuOneFragment menuOneFragment;
+    MineFragment mineFragment;
 
-    @BindView(R.id.rb_one)
-    RadioButton rb_one;
-    @BindView(R.id.rb_two)
-    RadioButton rb_two;
-    @BindView(R.id.rb_three)
-    RadioButton rb_three;
-    @BindView(R.id.rb_four)
-    RadioButton rb_four;
-    @BindView(R.id.boom)
-    BoomMenuButton boomMenuButton;
-    @BindView(R.id.tv_content)
-    TextView tv_content;
     int number;
     private static String[] text = new String[]{"清除缓存", "菜单二"};
     private static int[] imageResources = new int[]{
@@ -47,15 +41,21 @@ public class MainActivity extends BaseActivity {
 
     private static int imageResourceIndex = 0;
 
+
     @Override
-    public int intiLayout() {
+    public int setContentLayout() {
         return R.layout.activity_main;
+    }
+
+    @Override
+    public void initInjector(ApplicationComponent appComponent) {
+        DaggerHttpComponent.builder().applicationComponent(appComponent).build().inject(this);
     }
 
     @Override
     public void initView() {
         onItemClick(0);
-        number = boomMenuButton.getPiecePlaceEnum().pieceNumber();
+        number = bindingView.boom.getPiecePlaceEnum().pieceNumber();
         for (int i = 0; i < number; i++) {
             TextOutsideCircleButton.Builder builder = new TextOutsideCircleButton.Builder()
                     .listener(new OnBMClickListener() {
@@ -69,8 +69,22 @@ public class MainActivity extends BaseActivity {
                     })
                     .normalImageRes(getImageResource())
                     .normalText(getText());
-            boomMenuButton.addBuilder(builder);
+            bindingView.boom.addBuilder(builder);
         }
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        homeFragment = new HomeFragment();
+        transaction.add(R.id.fl_all, homeFragment);
+        transaction.commit();
+        onItemClick(0);
+        bindingView.btnBar.rbOne.setOnClickListener(v -> onItemClick(0));
+        bindingView.btnBar.rbTwo.setOnClickListener(v -> onItemClick(1));
+        bindingView.btnBar.rbTwo.setOnClickListener(v -> onItemClick(2));
+        bindingView.btnBar.rbFour.setOnClickListener(v -> onItemClick(3));
+    }
+
+    @Override
+    public void initIntent() {
+
     }
 
     @Override
@@ -80,25 +94,14 @@ public class MainActivity extends BaseActivity {
     }
 
 
-    @Override
-    public void initListener() {
-
-    }
-
-    @Override
-    public void initData() {
-
-    }
-
     /**
      * 选中第几位
      *
      * @param index
      */
     private void onItemClick(int index) {
-        BaseFragment fragment = FragmentFactory.getInstace().getFragment(index);
-        fragmentManager(R.id.fl_all, fragment, "" + index);
         changeSelectedTabState(index);
+        checkItem(0);
     }
 
     /**
@@ -107,45 +110,79 @@ public class MainActivity extends BaseActivity {
      * @param position 改变第几位
      */
     private void changeSelectedTabState(int position) {
-        rb_one.setTextColor(getResources().getColor(R.color.normal));
-        rb_two.setTextColor(getResources().getColor(R.color.normal));
-        rb_three.setTextColor(getResources().getColor(R.color.normal));
-        rb_four.setTextColor(getResources().getColor(R.color.normal));
+        bindingView.btnBar.rbOne.setTextColor(getResources().getColor(R.color.normal));
+        bindingView.btnBar.rbTwo.setTextColor(getResources().getColor(R.color.normal));
+        bindingView.btnBar.rbThree.setTextColor(getResources().getColor(R.color.normal));
+        bindingView.btnBar.rbFour.setTextColor(getResources().getColor(R.color.normal));
         switch (position) {
             case 0:
-                rb_one.setTextColor(getResources().getColor(R.color.appColor));
+                bindingView.btnBar.rbOne.setTextColor(getResources().getColor(R.color.appColor));
                 break;
             case 1:
-                rb_two.setTextColor(getResources().getColor(R.color.appColor));
+                bindingView.btnBar.rbTwo.setTextColor(getResources().getColor(R.color.appColor));
                 break;
             case 2:
-                rb_three.setTextColor(getResources().getColor(R.color.appColor));
+                bindingView.btnBar.rbThree.setTextColor(getResources().getColor(R.color.appColor));
                 break;
             case 3:
-                rb_four.setTextColor(getResources().getColor(R.color.appColor));
+                bindingView.btnBar.rbFour.setTextColor(getResources().getColor(R.color.appColor));
                 break;
         }
+
     }
 
-    /**
-     * 底部栏切换
-     */
-    @OnClick({R.id.rb_one, R.id.rb_two, R.id.rb_three, R.id.rb_four})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.rb_one:
-                onItemClick(0);
-                break;
-            case R.id.rb_two:
-                onItemClick(1);
-                break;
-            case R.id.rb_three:
-                onItemClick(2);
-                break;
-            case R.id.rb_four:
-                onItemClick(3);
-                break;
+    /***选中后的方法**/
+    public void checkItem(int i) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        changeSelectedTabState(i);
+        if (homeFragment != null) {
+            transaction.hide(homeFragment);
         }
+        if (menuOneFragment != null) {
+            transaction.hide(menuOneFragment);
+        }
+        if (menuTwoFragment != null) {
+            transaction.hide(menuTwoFragment);
+        }
+        if (mineFragment != null) {
+            transaction.hide(mineFragment);
+        }
+        switch (i) {
+            case 0:
+                if (homeFragment == null) {
+                    homeFragment = new HomeFragment();
+                    transaction.add(R.id.fl_all, homeFragment);
+                } else {
+                    transaction.show(homeFragment);
+                }
+                break;
+            case 1:
+                if (menuOneFragment == null) {
+                    menuOneFragment = new MenuOneFragment();
+                    transaction.add(R.id.fl_all, menuOneFragment);
+                } else {
+                    transaction.show(menuOneFragment);
+                }
+                break;
+            case 2:
+                if (menuTwoFragment == null) {
+                    menuTwoFragment = new MenuTwoFragment();
+                    transaction.add(R.id.fl_all, menuTwoFragment);
+                } else {
+                    transaction.show(menuTwoFragment);
+                }
+                break;
+            case 3:
+                if (mineFragment == null) {
+                    mineFragment = new MineFragment();
+                    transaction.add(R.id.fl_all, mineFragment);
+                } else {
+                    transaction.show(mineFragment);
+                }
+                break;
+
+        }
+        transaction.commitAllowingStateLoss();
     }
 
     /**
@@ -173,7 +210,7 @@ public class MainActivity extends BaseActivity {
      */
     public void getCacheSize() {
         try {
-            tv_content.setText(DataCleanManager.getTotalCacheSize(this));
+            bindingView.tvContent.setText(DataCleanManager.getTotalCacheSize(this));
         } catch (Exception e) {
             e.printStackTrace();
         }

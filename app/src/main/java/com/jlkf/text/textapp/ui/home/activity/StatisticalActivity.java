@@ -6,7 +6,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -18,40 +17,47 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.jlkf.text.textapp.R;
 import com.jlkf.text.textapp.base.BaseActivity;
+import com.jlkf.text.textapp.base.NoContract;
+import com.jlkf.text.textapp.base.NoPresenter;
+import com.jlkf.text.textapp.databinding.ActivityStatisticalBinding;
+import com.jlkf.text.textapp.injection.component.ApplicationComponent;
+import com.jlkf.text.textapp.injection.component.DaggerHttpComponent;
 import com.jlkf.text.textapp.view.MyMarkerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * 功能：统计图表
  * 依赖来源：https://github.com/PhilJay/MPAndroidChart
  * 依赖：com.github.PhilJay:MPAndroidChart:v3.1.0-alpha
  */
-public class StatisticalActivity extends BaseActivity {
-    @BindView(R.id.tv_title)
-    TextView tv_title;
-    @BindView(R.id.lineChart)
-    LineChart mLineChart;
+public class StatisticalActivity extends BaseActivity<NoPresenter, ActivityStatisticalBinding> implements NoContract.View {
+
     List<String> mList = new ArrayList<>();
     List<Integer> mIntList = new ArrayList<>();
 
+
     @Override
-    public int intiLayout() {
+    public int setContentLayout() {
         return R.layout.activity_statistical;
+    }
+
+    @Override
+    public void initInjector(ApplicationComponent appComponent) {
+        DaggerHttpComponent.builder().applicationComponent(appComponent).build().inject(this);
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void initView() {
-        tv_title.setText("图表");
+        bindingView.view.tvTitle.setText("图表");
+        bindingView.view.ivBack.setOnClickListener(v -> finish());
         //显示边界
-        mLineChart.setDrawBorders(false);
+        bindingView.lineChart.setDrawBorders(false);
         //设置数据
         List<Entry> entries = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
@@ -69,9 +75,9 @@ public class StatisticalActivity extends BaseActivity {
         lineDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 
         LineData data = new LineData(lineDataSet);
-        mLineChart.setData(data);
+        bindingView.lineChart.setData(data);
         //1.得到X轴：
-        XAxis xAxis = mLineChart.getXAxis();
+        XAxis xAxis = bindingView.lineChart.getXAxis();
         //2.设置X轴的位置（默认在上方）：
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);//值：BOTTOM,BOTH_SIDED,BOTTOM_INSIDE,TOP,TOP_INSIDE
         //3.设置X轴坐标之间的最小间隔（因为此图有缩放功能，X轴,Y轴可设置可缩放）
@@ -100,8 +106,8 @@ public class StatisticalActivity extends BaseActivity {
             }
         });
         //得到Y轴
-        YAxis yAxis = mLineChart.getAxisLeft();
-        YAxis rightYAxis = mLineChart.getAxisRight();
+        YAxis yAxis = bindingView.lineChart.getAxisLeft();
+        YAxis rightYAxis = bindingView.lineChart.getAxisRight();
         //设置Y轴是否显示
         rightYAxis.setEnabled(false); //右侧Y轴不显示
         //设置y轴坐标之间的最小间隔
@@ -125,20 +131,20 @@ public class StatisticalActivity extends BaseActivity {
             }
         });
         //图例：得到Lengend
-        Legend legend = mLineChart.getLegend();
+        Legend legend = bindingView.lineChart.getLegend();
         //隐藏Lengend
         legend.setEnabled(false);
         //隐藏描述
         Description description = new Description();
         description.setEnabled(false);
-        mLineChart.setDescription(description);
+        bindingView.lineChart.setDescription(description);
         //折线图点的标记
         MyMarkerView mv = new MyMarkerView(this);
-        mLineChart.setMarker(mv);
+        bindingView.lineChart.setMarker(mv);
         //图标刷新
-        mLineChart.invalidate();
+        bindingView.lineChart.invalidate();
         /*//解决滑动冲突
-        mLineChart.setOnTouchListener(new View.OnTouchListener()
+        bindingView.lineChart.setOnTouchListener(new View.OnTouchListener()
         {
             @Override
             public boolean onTouch(View v, MotionEvent event)
@@ -164,18 +170,8 @@ public class StatisticalActivity extends BaseActivity {
     }
 
     @Override
-    public void initListener() {
+    public void initIntent() {
 
     }
 
-    @Override
-    public void initData() {
-
-    }
-
-
-    @OnClick(R.id.iv_back)
-    public void onViewClicked() {
-        finish();
-    }
 }
