@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 按压状态 -->
+    <item android:top="-1dp" android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:bottomLeftRadius="@dimen/dp_12" android:bottomRightRadius="@dimen/dp_12" />
+            <solid android:color="@color/dialog_bg_press" />
+            <stroke android:color="@color/view_gray"
+                android:width="@dimen/dp_1"/>
+        </shape>
+    </item>
+
+    <!-- 焦点状态 -->
+    <item android:top="-1dp" android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:bottomLeftRadius="@dimen/dp_12" android:bottomRightRadius="@dimen/dp_12" />
+            <solid android:color="@color/dialog_bg_press" />
+            <stroke android:color="@color/view_gray"
+                android:width="@dimen/dp_1"/>
+        </shape>
+    </item>
+
+    <!-- 默认状态 -->
+    <item android:top="-1dp">
+        <shape android:shape="rectangle">
+            <corners android:bottomLeftRadius="@dimen/dp_12" android:bottomRightRadius="@dimen/dp_12" />
+            <solid android:color="@color/white" />
+            <stroke android:color="@color/view_gray"
+                android:width="@dimen/dp_1"/>
+        </shape>
+    </item>
+
+</layer-list>

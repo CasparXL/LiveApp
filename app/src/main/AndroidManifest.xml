@@ -42,7 +42,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-       <!-- <provider
+        <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.jlkf.text.textapp.fileprovider"
             android:exported="false"
@@ -50,7 +50,8 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider>-->
+        </provider>
+
         <activity
             android:name=".ui.home.activity.PhotoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -79,7 +80,8 @@
             android:name=".ui.home.activity.GreenDaoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait" />
-        <service android:name=".network.serverSocket.TcpService"/>
+
+        <service android:name=".network.serverSocket.TcpService" />
 
     </application>
 

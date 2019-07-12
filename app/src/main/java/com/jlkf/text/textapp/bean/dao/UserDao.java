@@ -2,6 +2,7 @@ package com.jlkf.text.textapp.bean.dao;
 
 import com.jlkf.text.textapp.app.BaseApplication;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.objectbox.Box;
@@ -14,6 +15,10 @@ public class UserDao {
 
     public static List<User> getAll() {
         return getBlogItemBox().getAll();
+    }
+
+    public static long getCount() {
+        return getBlogItemBox().count();
     }
 
     public static void delete(long id) {

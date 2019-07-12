@@ -19,6 +19,7 @@ import com.jlkf.text.textapp.ui.home.adapter.GreenDaoAdapter;
 import com.jlkf.text.textapp.util.decoration.Decoration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -49,43 +50,61 @@ public class GreenDaoActivity extends BaseActivity<NoPresenter, ActivityGreenDao
     @Override
     public void initView() {
         bindingView.include2.tvTitle.setText("数据库");
-        users = UserDao.getAll();
+        users = new ArrayList<>();//不能直接==UserDao.getAll();否则在
+        users.addAll(UserDao.getAll());
         adapter = new GreenDaoAdapter(users);
         bindingView.rvList.setLayoutManager(new LinearLayoutManager(this));
         bindingView.rvList.addItemDecoration(Decoration.decoration(10, 10, 20, 20));
         bindingView.rvList.setAdapter(adapter);
         bindingView.btnDelete.setOnClickListener(v -> {
-            if (UserDao.getAll().size() == 0) {
+            if (UserDao.getCount() == 0) {
                 toast("已经没有数据了");
                 return;
             }
             UserDao.delete(UserDao.getAll().get(0).getId());
             users.clear();
-            users.addAll(UserDao.getAll());
+            if (UserDao.getCount() > 0){
+                List<User> lists=new ArrayList<>(UserDao.getAll());
+                users.addAll(lists);
+            }
             adapter.notifyDataSetChanged();
         });
 
         bindingView.btnAdd.setOnClickListener(v -> {
+            if (name.get() == null || sex.get() == null || idCard == null) {
+                toast("请至少都输入一点~");
+                return;
+            }
             UserDao.insertOrUpdateBlogItem(new User(name.get() == null ? "" : name.get(), sex.get() == null ? "" : sex.get(), idCard.get() == null ? "" : idCard.get()));
             users.clear();
-            users.addAll(UserDao.getAll());
+            if (UserDao.getCount() > 0){
+                List<User> lists=new ArrayList<>(UserDao.getAll());
+                users.addAll(lists);
+            }
             adapter.notifyDataSetChanged();
         });
         bindingView.btnSelect.setOnClickListener(v -> {
             users.clear();
-            users.addAll(UserDao.getAll());
+            if (UserDao.getCount() > 0){
+                List<User> lists=new ArrayList<>(UserDao.getAll());
+                users.addAll(lists);
+            }
             adapter.notifyDataSetChanged();
         });
-        bindingView.btnUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (UserDao.getAll().size() == 0) {
-                    toast("已经没有数据了");
-                    return;
-                }
-                UserDao.insertOrUpdateBlogItem(new User(UserDao.getAll().get(0).getId(), name.get() == null ? "" : name.get(), sex.get() == null ? "" : sex.get(), idCard.get() == null ? "" : idCard.get()));
+        bindingView.btnUpdate.setOnClickListener(v -> {
+            if (UserDao.getAll().size() == 0) {
+                toast("已经没有数据了");
+                return;
             }
+            UserDao.insertOrUpdateBlogItem(new User(UserDao.getAll().get(0).getId(), name.get() == null ? "" : name.get(), sex.get() == null ? "" : sex.get(), idCard.get() == null ? "" : idCard.get()));
+            users.clear();
+            if (UserDao.getCount() > 0){
+                List<User> lists=new ArrayList<>(UserDao.getAll());
+                users.addAll(lists);
+            }
+            adapter.notifyDataSetChanged();
         });
+        bindingView.include2.ivBack.setOnClickListener(v -> finish());
 
     }
 

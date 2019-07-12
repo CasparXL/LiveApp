@@ -67,8 +67,6 @@ dependencies {
     annotationProcessor rootProject.ext.dependencies["glide-compiler"]
     //视频
     implementation rootProject.ext.dependencies["GSYVideoPlayer"]
-    //选择图像
-    implementation rootProject.ext.dependencies["PictureSelector"]
     //图表
     implementation rootProject.ext.dependencies["MPAndroidChart"]
     implementation rootProject.ext.dependencies["SuperCalendar"]

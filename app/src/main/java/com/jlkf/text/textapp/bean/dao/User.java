@@ -2,8 +2,10 @@ package com.jlkf.text.textapp.bean.dao;
 
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Uid;
 
 @Entity
+@Uid(8503529349746881264L)
 public class User {
     @Id
     private long id;
