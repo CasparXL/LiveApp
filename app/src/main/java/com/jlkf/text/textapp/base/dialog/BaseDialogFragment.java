@@ -42,9 +42,7 @@ public class BaseDialogFragment extends DialogFragment {
 
     @Override
     public void show(FragmentManager manager, String tag) {
-        if (!isRepeatedShow(tag)) {
-
-
+        if (!isRepeatedShow(tag)&&!manager.isStateSaved()) {
             super.show(manager, tag);
         }
     }
