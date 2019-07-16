@@ -81,8 +81,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait" />
 
-        <service android:name=".network.serverSocket.TcpService" />
-
     </application>
 
 </manifest>
