@@ -79,6 +79,10 @@ public abstract class BaseActivity<T extends BaseContract.BasePresenter, SV exte
             mPresenter.detachView();
             mPresenter = null;
         }
+        if (bindingView != null) {
+            bindingView.unbind();
+            bindingView = null;
+        }
     }
 
     public void toast(Object text) {

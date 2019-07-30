@@ -23,7 +23,6 @@ public abstract class BaseFragment<T extends BaseContract.BasePresenter, SV exte
     // 布局view
     protected SV bindingView;
 
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (setContentLayout() != 0) {
@@ -76,6 +75,10 @@ public abstract class BaseFragment<T extends BaseContract.BasePresenter, SV exte
         if (mPresenter != null) {
             mPresenter.detachView();
             mPresenter = null;
+        }
+        if (bindingView != null){
+            bindingView.unbind();
+            bindingView=null;
         }
     }
 

@@ -123,8 +123,7 @@ public class NetworkUtils {
      */
     public static boolean isNetworkAvailable(Context context) {
         try {
-            ConnectivityManager cm =
-                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo info = cm.getActiveNetworkInfo();
             return null != info && info.isConnected();
         } catch (Exception e) {
